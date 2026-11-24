@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LumiVision · 机器视觉智能打光方案设计台</title>
+<style>
+:root{
+  --bg:#080d18; --bg2:#0d1424; --panel:#111a2e; --panel2:#16213a;
+  --line:#22304d; --line2:#2e4166;
+  --txt:#e8eefc; --sub:#93a4c4; --dim:#64769a;
+  --cyan:#22d3ee; --cyan-d:#0e7490;
+  --amber:#fb923c; --green:#34d399; --red:#f87171; --violet:#a78bfa;
+  --glow:0 0 0 1px rgba(34,211,238,.35),0 8px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:14px}
+body{
+  min-height:100vh;
+  background-image:
+    radial-gradient(1200px 600px at 15% -10%,rgba(34,211,238,.08),transparent 60%),
+    radial-gradient(900px 500px at 95% 0%,rgba(251,146,60,.06),transparent 55%),
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:auto,auto,36px 36px,36px 36px;
+}
+.wrap{max-width:1560px;margin:0 auto;padding:0 26px 60px}
+
+/* ---------- Top bar ---------- */
+header{display:flex;align-items:center;gap:16px;padding:20px 0 18px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(145deg,var(--cyan),var(--cyan-d));
+  display:grid;place-items:center;box-shadow:0 6px 22px rgba(34,211,238,.35);flex:none}
+.logo svg{width:24px;height:24px}
+.brand h1{font-size:19px;margin:0;letter-spacing:.5px;font-weight:650}
+.brand p{margin:3px 0 0;color:var(--sub);font-size:12px;letter-spacing:2px}
+.spacer{flex:1}
+.badge{display:flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:20px;
+  padding:7px 14px;color:var(--sub);font-size:12px;background:rgba(255,255,255,.02)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+
+/* ---------- Layout ---------- */
+.grid{display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:16px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.28)}
+.card+.card{margin-top:16px}
+.card h2{font-size:13px;letter-spacing:1.5px;color:var(--cyan);margin:0 0 4px;font-weight:600;text-transform:uppercase}
+.card .hint{color:var(--dim);font-size:11.5px;margin:0 0 16px}
+.step{display:flex;align-items:center;gap:9px;margin:20px 0 11px}
+.step:first-of-type{margin-top:4px}
+.step .n{width:22px;height:22px;border-radius:6px;background:rgba(34,211,238,.14);color:var(--cyan);
+  border:1px solid rgba(34,211,238,.4);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.step .t{font-size:13px;font-weight:600;color:var(--txt)}
+.step .s{font-size:11px;color:var(--dim);margin-left:auto}
+
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.opt{border:1px solid var(--line2);background:rgba(255,255,255,.02);border-radius:10px;padding:11px 10px;
+  cursor:pointer;transition:.18s;display:flex;align-items:center;gap:9px;color:var(--sub);user-select:none}
+.opt:hover{border-color:var(--cyan-d);background:rgba(34,211,238,.06);color:var(--txt);transform:translateY(-1px)}
+.opt.on{border-color:var(--cyan);background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(34,211,238,.05));
+  color:#fff;box-shadow:inset 0 0 0 1px rgba(34,211,238,.25)}
+.opt .ico{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.05);display:grid;place-items:center;flex:none}
+.opt .ico svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+.opt.on .ico{background:rgba(34,211,238,.2);color:var(--cyan)}
+.opt .lbl{font-size:12.5px;line-height:1.25;font-weight:500}
+
+.sliders{margin-top:6px}
+.slider-row{margin:12px 0}
+.slider-row label{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:7px}
+.slider-row label b{color:var(--cyan);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--cyan);cursor:pointer;height:4px}
+
+.presets{display:flex;flex-wrap:wrap;gap:7px}
+.preset{border:1px dashed var(--line2);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--sub);
+  cursor:pointer;transition:.18s;background:rgba(255,255,255,.015)}
+.preset:hover{border-color:var(--amber);color:var(--amber);background:rgba(251,146,60,.06)}
+.btn{width:100%;margin-top:18px;border:none;border-radius:11px;padding:13px;cursor:pointer;
+  font-size:14px;font-weight:700;letter-spacing:1px;color:#04121a;
+  background:linear-gradient(135deg,var(--cyan),#38bdf8);box-shadow:0 8px 26px rgba(34,211,238,.3);transition:.2s}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn2{border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--sub);border-radius:9px;
+  padding:9px 12px;cursor:pointer;font-size:12px;transition:.18s}
+.btn2:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ---------- Result head ---------- */
+.res-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.score-ring{width:74px;height:74px;flex:none;position:relative}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .val{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;font-weight:700;color:var(--cyan)}
+.score-txt h3{margin:0;font-size:17px;font-weight:650}
+.score-txt p{margin:5px 0 0;color:var(--sub);font-size:12.5px;line-height:1.5}
+.tagrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--line2);color:var(--sub);background:rgba(255,255,255,.02)}
+.tag.hi{border-color:rgba(251,146,60,.5);color:var(--amber);background:rgba(251,146,60,.08)}
+
+/* ---------- Visualization ---------- */
+.viz-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.viz-grid{grid-template-columns:1fr}}
+.viz-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.viz-title span{font-size:12px;color:var(--sub);letter-spacing:.5px}
+.viz-title em{font-style:normal;font-size:10.5px;color:var(--dim)}
+#光路图{width:100%;height:auto;display:block;border-radius:10px;background:
+  radial-gradient(circle at 50% 40%,rgba(34,211,238,.07),transparent 65%),#0a1120;border:1px solid var(--line)}
+#预览图{width:100%;height:auto;display:block;border-radius:10px;background:#0a1120;border:1px solid var(--line)}
+
+/* ---------- Recommendation list ---------- */
+.plan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.plan{grid-template-columns:1fr}}
+.pcard{border:1px solid var(--line2);border-radius:12px;padding:14px;background:rgba(255,255,255,.02);position:relative;overflow:hidden;transition:.2s}
+.pcard.main{border-color:var(--cyan);box-shadow:var(--glow)}
+.pcard.main:before{content:"主推方案";position:absolute;right:0;top:0;background:var(--cyan);color:#04121a;
+  font-size:10px;font-weight:700;padding:4px 10px;border-radius:0 0 0 9px}
+.rank{font-size:11px;color:var(--dim);letter-spacing:1px}
+.pcard h4{margin:6px 0 2px;font-size:16px;color:var(--txt)}
+.pcard .en{font-size:10.5px;color:var(--dim);letter-spacing:.5px}
+.bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);margin:12px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--cyan-d),var(--cyan))}
+.pcard.alt .bar i{background:linear-gradient(90deg,#475569,var(--sub))}
+.pcard p{font-size:11.5px;color:var(--sub);line-height:1.6;margin:0}
+
+/* ---------- Detail table ---------- */
+.detail{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+@media(max-width:700px){.detail{grid-template-columns:1fr}}
+.drow{display:flex;border-bottom:1px solid var(--line)}
+.drow:nth-child(odd){border-right:1px solid var(--line)}
+.drow .k,.drow .v{padding:11px 14px;font-size:12.5px}
+.drow .k{width:118px;flex:none;color:var(--dim);background:rgba(255,255,255,.015)}
+.drow .v{color:var(--txt);flex:1}
+.drow .v b{color:var(--cyan);font-weight:600}
+
+/* ---------- Polarizer alert ---------- */
+.alert{margin-top:16px;border:1px solid rgba(251,146,60,.4);background:linear-gradient(135deg,rgba(251,146,60,.1),rgba(251,146,60,.03));
+  border-radius:12px;padding:14px 16px;display:flex;gap:13px;align-items:flex-start}
+.alert .ai{width:30px;height:30px;border-radius:8px;background:rgba(251,146,60,.18);display:grid;place-items:center;flex:none;color:var(--amber)}
+.alert .ai svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+.alert h4{margin:0 0 5px;font-size:13px;color:var(--amber)}
+.alert p{margin:0;font-size:12px;color:var(--sub);line-height:1.65}
+
+/* ---------- Principle / notes ---------- */
+.notes{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
+.notes h4{margin:0 0 10px;font-size:12px;color:var(--sub);letter-spacing:1px}
+.notes ul{margin:0;padding-left:18px;color:var(--sub);font-size:12px;line-height:1.8}
+.notes li{margin-bottom:3px}
+.notes li b{color:var(--txt);font-weight:600}
+
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap}
+.foot .actions{display:flex;gap:9px}
+.empty{display:grid;place-items:center;min-height:460px;color:var(--dim);text-align:center;gap:14px}
+.empty svg{width:64px;height:64px;stroke:var(--line2);fill:none;stroke-width:1.2}
+.empty p{margin:0;font-size:13px}.empty span{font-size:11.5px;color:#4d5d7d}
+
+/* helper */
+.mono{font-variant-numeric:tabular-nums;font-family:"Consolas",monospace}
+.fade{animation:fade .45s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media print{body{background:#fff;color:#000}header,.leftcol,.foot{display:none}.grid{grid-template-columns:1fr}.card{border-color:#ccc;background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#04121a" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <h1>LumiVision · 智能打光方案设计台</h1>
+      <p>MACHINE VISION LIGHTING DESIGN STUDIO</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="badge"><span class="dot"></span> 方案引擎在线 · 规则库 v2.4</div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ LEFT ============ -->
+    <div class="leftcol">
+      <div class="card">
+        <h2>场景配置</h2>
+        <p class="hint">依次选择产品、表面特性与检测任务，引擎实时生成推荐</p>
+
+        <div class="step"><span class="n">1</span><span class="t">产品类型</span><span class="s">选择被测物</span></div>
+        <div class="opts" id="产品类型"></div>
+
+        <div class="step"><span class="n">2</span><span class="t">表面特性</span><span class="s">决定打光方式</span></div>
+        <div class="opts" id="表面特性"></div>
+
+        <div class="step"><span class="n">3</span><span class="t">检测任务</span><span class="s">决定光路结构</span></div>
+        <div class="opts" id="检测任务"></div>
+
+        <div class="step"><span class="n">4</span><span class="t">成像参数</span><span class="s">精细修正</span></div>
+        <div class="sliders">
+          <div class="slider-row"><label>视场范围 FOV <b id="fovV">60 mm</b></label>
+            <input type="range" id="fov" min="10" max="300" value="60"></div>
+          <div class="slider-row"><label>工作距离 WD <b id="wdV">100 mm</b></label>
+            <input type="range" id="wd" min="30" max="500" value="100"></div>
+          <div class="slider-row"><label>产线速度 <b id="spdV">30 m/min</b></label>
+            <input type="range" id="spd" min="0" max="120" value="30"></div>
+        </div>
+        <button class="btn" id="genBtn">生成打光方案</button>
+      </div>
+
+      <div class="card">
+        <h2>快速预设</h2>
+        <p class="hint">点击载入典型检测场景，一键演示</p>
+        <div class="presets" id="presets"></div>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT ============ -->
+    <div class="resultcol" id="result">
+      <div class="empty" id="emptyState">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+        <p>等待场景配置</p>
+        <span>在左侧选择产品、表面与检测任务后点击「生成打光方案」</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== 图标库 ===================== */
+const ICONS={
+  metal:'<svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5v6l-9 5-9-5z"/><path d="M3 9l9 5 9-5M12 14v6"/></svg>',
+  glass:'<svg viewBox="0 0 24 24"><path d="M6 3h12l-2 18H8z"/><path d="M8 9h8"/></svg>',
+  plastic:'<svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 6V4h8v2"/></svg>',
+  pcb:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4v4H7zM15 8h3M15 12h3M7 16h10"/></svg>',
+  print:'<svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-6h16v6h-2"/><rect x="7" y="14" width="10" height="7"/></svg>',
+  film:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 10h4M17 10h4M3 14h4M17 14h4"/></svg>',
+  ceramic:'<svg viewBox="0 0 24 24"><path d="M4 15c0-6 4-10 8-10s8 4 8 10z"/><path d="M3 18h18"/></svg>',
+  food:'<svg viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 8 0 4 3 7 7 10 4-3 7-6 7-10 0-5-3-8-7-8z"/><path d="M12 7v8"/></svg>',
+  mirror:'<svg viewBox="0 0 24 24"><path d="M12 3l7 4v14l-7 3-7-3V7z"/><path d="M9 9l6 6"/></svg>',
+  semi:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M6 16c3-4 9-4 12 0" stroke-dasharray="2 2"/></svg>',
+  matte:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8 10h.01M12 8h.01M16 10h.01M10 14h.01M14 14h.01" stroke-width="2.5"/></svg>',
+  transparent:'<svg viewBox="0 0 24 24"><path d="M6 4h12l-1.5 16h-9z"/><path d="M9 8l6 8M15 8l-6 8" stroke-dasharray="2 2"/></svg>',
+  texture:'<svg viewBox="0 0 24 24"><path d="M3 16l4-5 4 3 4-7 6 9"/><path d="M3 20h18"/></svg>',
+  dark:'<svg viewBox="0 0 24 24"><path d="M20 15A8 8 0 1 1 9 4a8 8 0 0 0 11 11z"/></svg>',
+  defect:'<svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 3 10 3-7 2 2h4"/></svg>',
+  dimension:'<svg viewBox="0 0 24 24"><path d="M3 8v8M21 8v8M3 12h18"/><path d="M7 10l-2 2 2 2M17 10l2 2-2 2"/></svg>',
+  ocr:'<svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V7l6-4 6 4v13"/><path d="M9 11h6M12 8v8"/></svg>',
+  color:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16" opacity=".5"/></svg>',
+  position:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+  profile:'<svg viewBox="0 0 24 24"><path d="M3 18h18M3 15l5-6 4 4 5-8 4 6"/></svg>'
+};
+const icon=k=>`<span class="ico">${ICONS[k]||''}</span>`;
+
+/* ===================== 选项数据 ===================== */
+const PRODUCTS=[
+  {k:'metal',n:'金属加工件'},{k:'glass',n:'玻璃/透明件'},{k:'plastic',n:'塑料注塑件'},{k:'pcb',n:'PCB/电子元件'},
+  {k:'print',n:'印刷包装'},{k:'film',n:'薄膜/纸张'},{k:'ceramic',n:'陶瓷/石材'},{k:'food',n:'食品/医药'}
+];
+const SURFACES=[
+  {k:'mirror',n:'镜面高反光'},{k:'semi',n:'半光泽'},{k:'matte',n:'粗糙漫反射'},{k:'transparent',n:'透明/半透明'},
+  {k:'texture',n:'凹凸纹理'},{k:'dark',n:'深色吸光'}
+];
+const TASKS=[
+  {k:'defect',n:'缺陷/划痕检测'},{k:'dimension',n:'尺寸测量'},{k:'ocr',n:'字符识别 OCR'},
+  {k:'color',n:'颜色/色差检测'},{k:'position',n:'定位/计数'},{k:'profile',n:'3D轮廓/高度'}
+];
+const PRESETS=[
+  {n:'镜面金属划痕',v:{product:'metal',surface:'mirror',task:'defect'}},
+  {n:'玻璃瓶字符',v:{product:'glass',surface:'transparent',task:'ocr'}},
+  {n:'PCB 元件定位',v:{product:'pcb',surface:'semi',task:'position'}},
+  {n:'印刷色差检测',v:{product:'print',surface:'matte',task:'color'}},
+  {n:'注塑件尺寸',v:{product:'plastic',surface:'semi',task:'dimension'}}
+];
+
+/* ===================== 光源知识库（评分矩阵 0~3） ===================== */
+const LIGHTS=[
+  {id:'coaxial',name:'同轴光',en:'Coaxial Light',mode:'明场',angle:'0° 垂直入射',
+    surf:{mirror:3,semi:2,matte:0,transparent:1,texture:0,dark:1},
+    task:{defect:3,dimension:2,ocr:3,color:1,position:2,profile:0},
+    color:'白光 / 蓝光',polarizer:'强烈建议加装',filter:'可选窄带滤光片',
+    pros:'光线经分光棱镜垂直入射，消除镜面眩光，成像均匀，是高反光平面与镜面字符检测的首选。',
+    cons:'对凹凸起伏不敏感，视野受棱镜尺寸限制，成本较高。',
+    cam:'加装同轴棱镜/分光镜',model:'COX 系列同轴光源'},
+  {id:'lowangle',name:'低角度环形光',en:'Low Angle Ring Light',mode:'暗场',angle:'15°~30° 低角度',
+    surf:{mirror:1,semi:2,matte:2,transparent:0,texture:3,dark:1},
+    task:{defect:3,dimension:1,ocr:1,color:0,position:1,profile:2},
+    color:'白光 / 蓝光',polarizer:'一般不需要',filter:'—',
+    pros:'低角度掠射使凹凸、划痕、边缘产生强烈明暗对比（暗场效应），是表面缺陷与纹理检测的主力方案。',
+    cons:'平面无特征区域会偏暗，需控制角度避免遮挡阴影。',
+    cam:'普通工业镜头即可',model:'LAR 系列低角度环光'},
+  {id:'dome',name:'穹顶积分球光',en:'Dome / Integrating Light',mode:'漫射',angle:'全方向漫射照明',
+    surf:{mirror:3,semi:3,matte:1,transparent:1,texture:2,dark:1},
+    task:{defect:2,dimension:1,ocr:2,color:2,position:1,profile:1},
+    color:'白光',polarizer:'可不加',filter:'—',
+    pros:'半球漫射腔提供全角度均匀柔光，专治曲面、异形高反光件，避免局部过曝与亮斑。',
+    cons:'亮度相对较低，需高灵敏相机；体积较大。',
+    cam:'标准镜头 / 远心镜头',model:'DM 系列穹顶光'},
+  {id:'backlight',name:'背光源',en:'Backlight',mode:'背光',angle:'180° 透射照明',
+    surf:{mirror:1,semi:1,matte:2,transparent:3,texture:1,dark:2},
+    task:{defect:1,dimension:3,ocr:0,color:0,position:3,profile:1},
+    color:'白光 / 红光',polarizer:'不需要',filter:'—',
+    pros:'被测物呈剪影，边缘轮廓锐利无阴影，是尺寸测量、计数、透明件与透光检测的标准方案。',
+    cons:'无法呈现表面灰度与颜色信息，需配合正面光做复合检测。',
+    cam:'建议远心镜头',model:'BL 系列背光板'},
+  {id:'ring',name:'环形光',en:'Ring Light',mode:'明场/漫射',angle:'45°~70° 环形入射',
+    surf:{mirror:1,semi:2,matte:2,transparent:0,texture:2,dark:1},
+    task:{defect:2,dimension:1,ocr:2,color:1,position:2,profile:1},
+    color:'白光 / 红光',polarizer:'视反光情况',filter:'—',
+    pros:'通用性最强的标准光源，安装方便、照明均匀，适合常规外观、字符与定位场景。',
+    cons:'高镜面工件易产生环形亮斑，需改同轴或穹顶。',
+    cam:'标准工业镜头',model:'RI 系列环形光'},
+  {id:'bar',name:'条形光',en:'Bar Light',mode:'明场/暗场',angle:'可调 0°~90°，多角度组合',
+    surf:{mirror:2,semi:2,matte:2,transparent:1,texture:2,dark:1},
+    task:{defect:2,dimension:2,ocr:2,color:1,position:1,profile:2},
+    color:'白光 / 蓝光 / 红光',polarizer:'视情况',filter:'—',
+    pros:'安装角度灵活，可单侧/双侧/多角度组合，适合线扫相机、长条工件边缘与立体轮廓打光。',
+    cons:'单条光均匀性弱于环形与穹顶，需多灯拼接。',
+    cam:'线扫 / 面阵镜头',model:'BA 系列条形光'},
+  {id:'rgb',name:'多色/三色光',en:'Multi-color Light',mode:'多光谱',angle:'分区/分时切换',
+    surf:{mirror:1,semi:1,matte:2,transparent:2,texture:1,dark:2},
+    task:{defect:2,dimension:1,ocr:1,color:3,position:1,profile:1},
+    color:'RGB 三色 / 白光高显色',polarizer:'可不加',filter:'窄带滤光片',
+    pros:'通过红绿蓝分时打光与色彩比值算法放大微小色差，是颜色分选与色差检测的核心方案。',
+    cons:'需配合彩色相机与色彩标定，算法复杂。',
+    cam:'彩色相机 + 白平衡标定',model:'MC 系列三色光'}
+];
+
+/* ===================== 评分与推荐 ===================== */
+function evaluate(state){
+  const list=LIGHTS.map(l=>{
+    let s=(l.surf[state.surface]||0)*1.15+(l.task[state.task]||0)*1.25;
+    // 产品修正
+    if(state.product==='glass'||state.product==='film') { if(l.id==='backlight')s+=2.2; }
+    if(state.product==='metal'&&state.surface==='mirror'){ if(l.id==='coaxial'||l.id==='dome')s+=1.3; }
+    if(state.product==='pcb'){ if(l.id==='coaxial'||l.id==='ring')s+=0.8; }
+    if(state.product==='ceramic'){ if(l.id==='dome'||l.id==='lowangle')s+=0.7; }
+    if(state.product==='food'){ if(l.id==='rgb'||l.id==='ring')s+=0.8; }
+    // 任务强规则
+    if(state.task==='dimension'&&l.id==='backlight')s+=1.5;
+    if(state.task==='color'&&l.id==='rgb')s+=2.5;
+    if(state.task==='profile'&&(l.id==='lowangle'||l.id==='bar'))s+=1.2;
+    if(state.task==='defect'&&state.surface==='mirror'&&(l.id==='coaxial'||l.id==='dome'))s+=1.2;
+    if(state.task==='ocr'&&l.id==='coaxial')s+=1.0;
+    // 参数修正
+    if(state.fov>150&&l.id==='backlight')s+=0.4;
+    if(state.spd>60&&(l.id==='coaxial'||l.id==='backlight'))s+=0.5; // 高速需要高亮稳定
+    return {...l,score:Math.min(9.9,s)};
+  }).sort((a,b)=>b.score-a.score);
+  return list;
+}
+
+function getColorRec(state,main){
+  if(state.task==='color')return {c:'高显色白光 (CRI>90) / RGB 分时',why:'颜色检测需真实还原色相，避免单色光造成色偏'};
+  if(state.surface==='mirror'&&state.product==='metal')return {c:'蓝光 470nm 或红光 630nm',why:'窄带单色光可抑制金属镜面反光噪点，提升缺陷对比度'};
+  if(state.surface==='dark')return {c:'红光 630~660nm',why:'深色吸光材质对红光反射更强，可提高信噪比'};
+  if(state.task==='dimension'||state.task==='position')return {c:'白光 / 红光',why:'背光剪影场景白光通用，红光配合滤片可抗环境光干扰'};
+  if(state.surface==='transparent')return {c:'白光',why:'透明件需宽谱光保证透射与边缘清晰度'};
+  return {c:main.color,why:'按主流方案推荐，可按实际材质微调波长'};
+}
+
+function getPolarizer(state){
+  const heavy=(state.surface==='mirror')||(state.product==='metal'&&state.surface==='semi');
+  if(heavy)return {level:'必需',text:'在光源与镜头前端各加装一片偏振片，旋转至正交（正交偏振）可消除镜面眩光，只保留漫反射信息，让划痕、字符清晰浮现。建议选高消光比（≥10⁵:1）线偏振片。'};
+  if(state.surface==='semi'||state.product==='glass')return {level:'建议',text:'半光泽/透明表面易产生部分反光，可加装一片圆偏振片降低眩光；若图像已清晰则非必需。'};
+  return {level:'可选',text:'当前表面以漫反射为主，一般无需偏振片；若现场出现局部亮斑，可补加偏振片微调。'};
+}
+
+function getNotes(state,top){
+  const notes=[];
+  notes.push(`<b>核心逻辑：</b>${surfaceName(state.surface)} + ${taskName(state.task)} 的组合下，「${top.name}」得分最高。${top.pros}`);
+  if(state.surface==='mirror'||state.surface==='semi')notes.push('<b>反光处理：</b>镜面/半光泽表面优先同轴光或穹顶光，配合正交偏振片；避免用普通环形光直射，否则会出现大面积亮斑过曝。');
+  if(state.task==='defect')notes.push('<b>缺陷检测：</b>划痕、凹凸类缺陷宜用低角度暗场照明，让缺陷"发亮"、背景"变暗"，信噪比最高。');
+  if(state.task==='dimension')notes.push('<b>尺寸测量：</b>背光成剪影 + 远心镜头可消除透视误差，边缘定位精度可达亚像素级。');
+  if(state.surface==='transparent')notes.push('<b>透明件：</b>优先透射背光勾勒轮廓，必要时叠加低角度正面光检测表面瑕疵。');
+  if(state.task==='color')notes.push('<b>颜色检测：</b>需稳定色温与高显色指数光源，并做好白平衡标定，避免环境光干扰。');
+  if(state.spd>60)notes.push(`<b>高速产线：</b>${state.spd} m/min 下建议选高亮度 LED 并缩短曝光，或用频闪同步触发冻结运动模糊。`);
+  return notes;
+}
+const surfaceName=k=>(SURFACES.find(x=>x.k===k)||{}).n||'';
+const taskName=k=>(TASKS.find(x=>x.k===k)||{}).n||'';
+const productName=k=>(PRODUCTS.find(x=>x.k===k)||{}).n||'';
+
+/* ===================== SVG 打光示意图（参数化） ===================== */
+function drawSetup(state,light){
+  const C={white:'#e8eefc',red:'#f87171',blue:'#60a5fa',green:'#4ade80'};
+  const beam=state.task==='color'?C.white:(state.surface==='mirror'&&state.product==='metal'?C.blue:C.white);
+  let src='';
+  const cam=`
+    <rect x="266" y="18" width="68" height="36" rx="7" fill="#1b2740" stroke="#3a5180"/>
+    <rect x="286" y="54" width="28" height="20" fill="#223353" stroke="#3a5180"/>
+    <circle cx="300" cy="76" r="9" fill="#0a1120" stroke="${C.white}" stroke-width="1.5"/>
+    <text x="300" y="14" fill="#93a4c4" font-size="11" text-anchor="middle">工业相机</text>
+    <line x1="300" y1="86" x2="300" y2="252" stroke="#3a5180" stroke-dasharray="4 5"/>
+  `;
+  const product=`
+    <path d="M170 262 L430 262 L448 292 L152 292 Z" fill="#1a2740" stroke="#4a628f" stroke-width="1.5"/>
+    <path d="M152 292 L448 292 L448 302 L152 302 Z" fill="#0f1728" stroke="#2e4166"/>
+    <text x="300" y="322" fill="#93a4c4" font-size="11" text-anchor="middle">被测工件 · ${productName(state.product)} · ${surfaceName(state.surface)}</text>
+  `;
+  const ray=(x1,y1,x2,y2,op=.9)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${beam}" stroke-width="2" opacity="${op}" marker-end="url(#ar)"/>`;
+  const defs=`<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6z" fill="${beam}"/></marker>
+    <radialGradient id="glow"><stop stop-color="${beam}" stop-opacity=".35"/><stop offset="1" stop-color="${beam}" stop-opacity="0"/></radialGradient></defs>`;
+
+  switch(light.id){
+    case 'coaxial':
+      src=`<rect x="150" y="120" width="60" height="24" rx="5" fill="#3a2a12" stroke="${C.white}" stroke-opacity=".5"/>
+        <text x="180" y="116" fill="#93a4c4" font-size="10" text-anchor="middle">光源</text>
+        ${ray(210,132,296,142)}
+        <path d="M286 132 L314 132 L314 152 L286 152 Z" fill="#1d3a4a" stroke="${beam}" stroke-width="1.5" transform="rotate(45 300 142)"/>
+        <text x="338" y="150" fill="#93a4c4" font-size="10">45°分光镜</text>
+        ${ray(300,152,300,255)}
+        <ellipse cx="300" cy="258" rx="70" ry="12" fill="url(#glow)"/>`;
+      break;
+    case 'lowangle':
+      src=`<ellipse cx="300" cy="92" rx="66" ry="18" fill="none" stroke="${beam}" stroke-width="4" opacity=".85"/>
+        <ellipse cx="300" cy="100" rx="66" ry="18" fill="url(#glow)"/>
+        ${ray(238,100,190,258)}${ray(362,100,410,258)}
+        <text x="120" y="200" fill="#93a4c4" font-size="10">低角度掠射</text>`;
+      break;
+    case 'dome':
+      src=`<path d="M150 258 A150 150 0 0 1 450 258" fill="#162540" stroke="${beam}" stroke-width="2" stroke-opacity=".6"/>
+        <path d="M170 258 A130 130 0 0 1 430 258" fill="none" stroke="${beam}" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+        ${ray(200,150,230,258)}${ray(300,120,300,258)}${ray(400,150,370,258)}
+        <text x="300" y="128" fill="#93a4c4" font-size="10" text-anchor="middle">半球漫射腔</text>`;
+      break;
+    case 'backlight':
+      src=`<rect x="130" y="308" width="340" height="18" rx="5" fill="${beam}" opacity=".3" stroke="${beam}"/>
+        <text x="300" y="338" fill="${beam}" font-size="10" text-anchor="middle">高亮背光板</text>
+        ${ray(180,308,180,268)}${ray(240,308,240,268)}${ray(300,308,300,268)}${ray(360,308,360,268)}${ray(420,308,420,268)}`;
+      break;
+    case 'ring':
+      src=`<ellipse cx="300" cy="94" rx="58" ry="16" fill="none" stroke="${beam}" stroke-width="6" opacity=".9"/>
+        <ellipse cx="300" cy="96" rx="58" ry="16" fill="url(#glow)"/>
+        ${ray(244,98,205,255)}${ray(356,98,395,255)}
+        <text x="410" y="120" fill="#93a4c4" font-size="10">45°环形光</text>`;
+      break;
+    case 'bar':
+      src=`<rect x="96" y="180" width="16" height="80" rx="4" fill="${beam}" opacity=".75"/>
+        <rect x="488" y="180" width="16" height="80" rx="4" fill="${beam}" opacity=".75"/>
+        <text x="96" y="172" fill="#93a4c4" font-size="10" text-anchor="middle">条形光</text>
+        ${ray(112,200,215,258)}${ray(488,200,385,258)}
+        ${ray(112,240,180,262,.7)}${ray(488,240,420,262,.7)}`;
+      break;
+    case 'rgb':
+      src=`<rect x="150" y="110" width="300" height="14" rx="6" fill="url(#rgbgrad)"/>
+        <defs><linearGradient id="rgbgrad"><stop stop-color="#f87171"/><stop offset=".5" stop-color="#4ade80"/><stop offset="1" stop-color="#60a5fa"/></linearGradient></defs>
+        ${ray(180,124,215,258)}${ray(300,124,300,258)}${ray(420,124,385,258)}
+        <text x="300" y="104" fill="#93a4c4" font-size="10" text-anchor="middle">RGB 分时多色照明</text>`;
+      break;
+  }
+  return `<svg id="光路图" viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg">${defs}${cam}${src}${product}
+    <text x="16" y="24" fill="#22d3ee" font-size="11" letter-spacing="1">光路示意 · ${light.name} · ${light.mode}</text></svg>`;
+}
+
+/* 成像效果预览（模拟） */
+function drawPreview(state,top){
+  const defBg=state.surface==='dark'?'#0a0a0c':'#1e2b40';
+  let texture='';
+  if(['defect','texture'].includes(state.surface)||state.task==='defect'){
+    texture=`<path d="M40 120l60-14M90 70l40 22M150 110l50-8M60 160l70 6" stroke="#cfe0ff" stroke-width="1.4" opacity="${top.mode==='暗场'?'.95':'.4'}"/>`;
+  }
+  if(state.surface==='texture'||state.task==='profile'){
+    texture+=`<path d="M30 150l40-20 40 10 40-30 40 20 40-25 40 15" stroke="#9fd0ff" stroke-width="1.2" fill="none" opacity=".6"/>`;
+  }
+  if(state.task==='color'){
+    texture+=`<circle cx="70" cy="80" r="18" fill="#f87171" opacity=".75"/><circle cx="130" cy="80" r="18" fill="#4ade80" opacity=".75"/><circle cx="190" cy="80" r="18" fill="#60a5fa" opacity=".75"/>`;
+  }
+  if(top.id==='backlight'){
+    texture=`<rect x="30" y="55" width="180" height="90" fill="#0a0a0f"/><rect x="30" y="55" width="180" height="90" fill="none" stroke="#e8eefc" stroke-width="2"/>`;
+  }
+  return `<svg id="预览图" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="pv" cx="50%" cy="45%"><stop stop-color="${top.id==='backlight'?'#000':'#33496b'}"/><stop offset="1" stop-color="#0a1120"/></radialGradient></defs>
+    <rect width="240" height="200" fill="url(#pv)"/>
+    <rect x="14" y="40" width="212" height="120" rx="6" fill="${top.id==='backlight'?'#000':defBg}" opacity=".55" stroke="#3a5180"/>
+    ${texture}
+    <text x="120" y="182" fill="#64769a" font-size="10" text-anchor="middle">模拟成像 · ${top.mode}照明</text>
+    <text x="12" y="22" fill="#22d3ee" font-size="10" letter-spacing="1">成像预览</text></svg>`;
+}
+
+/* ===================== 渲染 ===================== */
+const state={product:'',surface:'',task:'',fov:60,wd:100,spd:30};
+function renderOptions(){
+  [['产品类型',PRODUCTS,'product'],['表面特性',SURFACES,'surface'],['检测任务',TASKS,'task']].forEach(([id,arr,key])=>{
+    document.getElementById(id).innerHTML=arr.map(o=>
+      `<div class="opt ${state[key]===o.k?'on':''}" data-key="${key}" data-val="${o.k}">${icon(o.k)}<span class="lbl">${o.n}</span></div>`).join('');
+  });
+  document.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+    state[el.dataset.key]=el.dataset.val; renderOptions();
+  });
+  document.getElementById('presets').innerHTML=PRESETS.map((p,i)=>`<div class="preset" data-i="${i}">${p.n}</div>`).join('');
+  document.querySelectorAll('.preset').forEach(el=>el.onclick=()=>{
+    const p=PRESETS[el.dataset.i];Object.assign(state,p.v);renderOptions();generate();
+  });
+}
+function bindSliders(){
+  [['fov','fovV',' mm'],['wd','wdV',' mm'],['spd','spdV',' m/min']].forEach(([id,vid,unit])=>{
+    const el=document.getElementById(id);
+    el.oninput=()=>{state[id]=+el.value;document.getElementById(vid).textContent=el.value+unit;};
+  });
+  document.getElementById('genBtn').onclick=generate;
+}
+function generate(){
+  if(!state.product||!state.surface||!state.task){
+    alert('请完整选择产品类型、表面特性和检测任务');return;
+  }
+  const list=evaluate(state),top=list[0],color=getColorRec(state,top),pol=getPolarizer(state);
+  const r=document.getElementById('result');
+  r.innerHTML=`<div class="fade">
+    <div class="card">
+      <div class="res-head">
+        <div class="score-ring"><svg width="74" height="74"><circle cx="37" cy="37" r="31" fill="none" stroke="#22304d" stroke-width="6"/>
+          <circle cx="37" cy="37" r="31" fill="none" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"
+          stroke-dasharray="${(top.score/10)*195} 195"/></svg><div class="val">${top.score.toFixed(1)}</div></div>
+        <div class="score-txt"><h3>推荐方案：${top.name} · ${top.mode}</h3>
+          <p>针对「${productName(state.product)} / ${surfaceName(state.surface)} / ${taskName(state.task)}」场景，综合匹配度 ${(top.score*10).toFixed(0)}%</p>
+          <div class="tagrow"><span class="tag hi">${top.angle}</span><span class="tag">${color.c}</span><span class="tag">${top.mode}照明</span><span class="tag">WD ${state.wd}mm · FOV ${state.fov}mm</span></div>
+        </div>
+      </div>
+      <div class="viz-grid">
+        <div><div class="viz-title"><span>光路结构示意</span><em>相机 / 光源 / 工件相对位置</em></div>${drawSetup(state,top)}</div>
+        <div><div class="viz-title"><span>成像效果模拟</span><em>${top.mode}照明下的表面表现</em></div>${drawPreview(state,top)}</div>
+      </div>
+      <div class="plan">
+        ${list.slice(0,3).map((l,i)=>`<div class="pcard ${i===0?'main':'alt'}">
+          <div class="rank">${i===0?'BEST MATCH':'备选 '+(i+1)}</div>
+          <h4>${l.name}</h4><div class="en">${l.en}</div>
+          <div class="bar"><i style="width:${l.score*10}%"></i></div>
+          <p>${l.pros}</p></div>`).join('')}
+      </div>
+      <div class="detail">
+        <div class="drow"><div class="k">光源型号建议</div><div class="v"><b>${top.model}</b> · ${top.name}</div></div>
+        <div class="drow"><div class="k">推荐波长/颜色</div><div class="v"><b>${color.c}</b><br><span style="color:var(--dim);font-size:11px">${color.why}</span></div></div>
+        <div class="drow"><div class="k">入射角度</div><div class="v"><b>${top.angle}</b>（${top.mode}）</div></div>
+        <div class="drow"><div class="k">偏振/滤镜</div><div class="v"><b>${top.polarizer}</b> · ${top.filter}</div></div>
+        <div class="drow"><div class="k">镜头与相机</div><div class="v">${top.cam}</div></div>
+        <div class="drow"><div class="k">注意事项</div><div class="v">${top.cons}</div></div>
+      </div>
+      <div class="alert"><div class="ai"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+        <div><h4>反光与镜片专项建议 · ${pol.level}</h4><p>${pol.text}</p></div></div>
+      <div class="notes"><h4>方案原理与调试要点</h4><ul>${getNotes(state,top).map(n=>`<li>${n}</li>`).join('')}</ul></div>
+      <div class="foot"><span style="color:var(--dim);font-size:11px">方案由 LumiVision 规则引擎生成 · ${new Date().toLocaleString('zh-CN')}</span>
+        <div class="actions"><button class="btn2" id="copyBtn">复制方案</button><button class="btn2" id="printBtn">导出/打印</button></div></div>
+    </div></div>`;
+  document.getElementById('copyBtn').onclick=()=>{
+    const txt=`【LumiVision 打光方案】\n场景：${productName(state.product)} / ${surfaceName(state.surface)} / ${taskName(state.task)}\n主推光源：${top.name}（${top.mode}，${top.angle}）\n颜色：${color.c}\n偏振建议：${pol.level} - ${pol.text}\n镜头：${top.cam}\n注意：${top.cons}`;
+    navigator.clipboard.writeText(txt).then(()=>alert('方案已复制到剪贴板')).catch(()=>alert('复制失败，请手动选择文本'));
+  };
+  document.getElementById('printBtn').onclick=()=>window.print();
+}
+
+renderOptions();bindSliders();
+</script>
+</body>
+</html>
