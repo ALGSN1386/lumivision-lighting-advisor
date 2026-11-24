@@ -2,9 +2,7 @@
 
 # LumiVision · 机器视觉智能打光方案设计台
 
-[![立即在线使用软件](https://img.shields.io/badge/立即在线使用-22d3ee?style=for-the-badge)](https://algsn1386.github.io/lumivision-lighting-advisor/)
-
-[![答辩指挥中心](https://img.shields.io/badge/答辩指挥中心-a78bfa?style=for-the-badge)](https://algsn1386.github.io/lumivision-lighting-advisor/defense-command-center.html)
+### 🚀 [👉 立即在线使用软件](https://lumivision-lighting-advisor.app.workbuddy.host/?sharecode=EZFQ7XEXKH)
 
 </div>
 
@@ -28,13 +26,9 @@
 
 ## 🚀 快速开始
 
-直接用浏览器打开 `machine-vision-lighting-advisor.html` 即可使用。
+**在线使用**：点击页面顶部的「立即在线使用软件」链接，即可在浏览器中直接运行，无需下载。
 
-如需在线访问，可在本仓库启用 **GitHub Pages**（Settings → Pages → Deploy from a branch → main），然后通过以下地址查看：
-
-```
-https://<你的用户名>.github.io/<仓库名>/machine-vision-lighting-advisor.html
-```
+**本地使用**：直接用浏览器打开 `index.html` 或 `machine-vision-lighting-advisor.html` 即可。
 
 ## 🧠 推荐逻辑
 
@@ -54,8 +48,8 @@ https://<你的用户名>.github.io/<仓库名>/machine-vision-lighting-advisor.
 
 ```
 .
+├── index.html                            # 在线访问入口
 ├── machine-vision-lighting-advisor.html   # 核心应用：智能打光方案设计台
-├── defense-command-center.html            # 附加：项目答辩指挥中心
 └── README.md
 ```
 
