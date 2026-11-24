@@ -1,4 +1,12 @@
+<div align="center">
+
 # LumiVision · 机器视觉智能打光方案设计台
+
+[![立即在线使用软件](https://img.shields.io/badge/立即在线使用-22d3ee?style=for-the-badge)](https://algsn1386.github.io/lumivision-lighting-advisor/)
+
+[![答辩指挥中心](https://img.shields.io/badge/答辩指挥中心-a78bfa?style=for-the-badge)](https://algsn1386.github.io/lumivision-lighting-advisor/defense-command-center.html)
+
+</div>
 
 > 面向机器视觉工程的打光方案辅助决策工具。选择产品类型、表面特性与检测任务，规则引擎即可实时推荐最优光源方案，并给出光路结构示意、选型建议与调试要点。
 
